@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
 import { GroupImagesController, ImagesController } from './images.controller';
 import { ImagesService } from './images.service';
+import { StorageService } from './storage.service';
 
 @Module({
   controllers: [GroupImagesController, ImagesController],
-  providers: [ImagesService],
-  exports: [ImagesService],
+  providers: [ImagesService, StorageService],
+  exports: [ImagesService, StorageService],
 })
 export class ImagesModule {}

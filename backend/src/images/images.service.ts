@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
-import * as fs from 'fs';
-import * as path from 'path';
+import { StorageService } from './storage.service';
 
 export interface ImageRecord {
   id: string;
@@ -15,7 +14,10 @@ export interface ImageRecord {
 export class ImagesService {
   private readonly logger = new Logger(ImagesService.name);
 
-  constructor(private readonly db: DatabaseService) {}
+  constructor(
+    private readonly db: DatabaseService,
+    private readonly storageService: StorageService,
+  ) {}
 
   async findByGroupId(groupId: string): Promise<ImageRecord[]> {
     const groupCheck = await this.db.query(
@@ -51,7 +53,7 @@ export class ImagesService {
 
   async create(
     groupId: string,
-    filename: string,
+    file: Express.Multer.File,
     caption?: string,
   ): Promise<ImageRecord> {
     const groupCheck = await this.db.query(
@@ -62,7 +64,9 @@ export class ImagesService {
       throw new NotFoundException(`Draft group dengan ID "${groupId}" tidak ditemukan`);
     }
 
-    const imageUrl = `/uploads/${filename}`;
+    // Delegate upload to StorageService (safe for Vercel, ready for Vercel Blob)
+    const imageUrl = await this.storageService.upload(file);
+
     const query = `
       INSERT INTO images (group_id, image_url, caption)
       VALUES ($1, $2, $3)
@@ -83,16 +87,11 @@ export class ImagesService {
     const deleteQuery = `DELETE FROM images WHERE id = $1;`;
     await this.db.query(deleteQuery, [id]);
 
-    // Attempt to delete physical file from disk
+    // Delete from storage service
     try {
-      const filename = path.basename(image.image_url);
-      const filePath = path.join(process.cwd(), 'uploads', filename);
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-        this.logger.log(`Deleted file from disk: ${filePath}`);
-      }
+      await this.storageService.delete(image.image_url);
     } catch (err) {
-      this.logger.warn(`Could not delete physical file: ${err.message}`);
+      this.logger.warn(`Could not delete file from storage: ${err.message}`);
     }
 
     return { message: 'Gambar berhasil dihapus', id };

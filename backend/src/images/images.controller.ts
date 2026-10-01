@@ -33,7 +33,7 @@ export const imageFileFilter = (req, file, cb) => {
 
 @Controller('groups/:groupId/images')
 export class GroupImagesController {
-  constructor(private readonly imagesService: ImagesService) {}
+  constructor(private readonly imagesService: ImagesService) { }
 
   @Get()
   async findByGroupId(
@@ -65,7 +65,7 @@ export class GroupImagesController {
 
 @Controller('images')
 export class ImagesController {
-  constructor(private readonly imagesService: ImagesService) {}
+  constructor(private readonly imagesService: ImagesService) { }
 
   @Delete(':id')
   async remove(@Param('id', ParseUUIDPipe) id: string) {

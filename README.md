@@ -71,14 +71,12 @@ Anda dapat membuatnya melalui SQL shell / pgAdmin:
 CREATE DATABASE drafter_db;
 ```
 
-Buka file `backend/.env` dan sesuaikan kredensial PostgreSQL Anda jika berbeda:
+Buka file `backend/.env` dan sesuaikan koneksi PostgreSQL (`DATABASE_URL`) Anda:
 ```env
 PORT=4000
-DB_HOST=localhost
-DB_PORT=5432
-DB_USER=postgres
-DB_PASSWORD=YOUR_POSTGRES_PASSWORD
-DB_NAME=drafter_db
+DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@localhost:5432/drafter_db
+# Atau untuk Neon PostgreSQL di production:
+# DATABASE_URL=postgresql://neondb_owner:password@ep-xyz.us-east-2.aws.neon.tech/drafter?sslmode=require
 FRONTEND_URL=http://localhost:3000
 ```
 

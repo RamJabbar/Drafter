@@ -8,7 +8,7 @@ import {
   UpdateNotePayload,
 } from './types';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001').replace(/\/+$/, '');
 
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
@@ -27,10 +27,15 @@ async function handleResponse<T>(res: Response): Promise<T> {
 }
 
 export const api = {
-  // Helper to format full image URL
   getImageUrl(url: string): string {
     if (!url) return '';
-    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    if (
+      url.startsWith('http://') ||
+      url.startsWith('https://') ||
+      url.startsWith('data:')
+    ) {
+      return url;
+    }
     return `${BASE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
   },
 
